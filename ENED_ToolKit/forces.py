@@ -16,8 +16,8 @@ class Force:
         self.x = self.mag * cos(self.ang)
         self.y = self.mag * sin(self.ang)
 
-    @classmethod
-    def parseXY(cls, x, y, unit="N"):
+    @staticmethod
+    def parseXY(x, y, unit="N"):
         mag = sqrt(x ** 2 + y ** 2)
         ang = atan(y / x)
         return Force(mag, ang,units=unit)
