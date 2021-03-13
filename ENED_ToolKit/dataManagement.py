@@ -1,9 +1,12 @@
 import plotly.graph_objects as go
 import math
+import pandas as pd
 
 
 class Data:
-    def __init__(self, vals:list):
+    ignore_var = []
+
+    def __init__(self, vals: list):
         self.y = vals[:]
         self.mean = sum(self.y)/len(self.y)
         self.mode = None
@@ -44,10 +47,10 @@ class Data:
     def __repr__(self):
         res = ''
         for i in dir(self):
-            if '_' in i:
+            if '_' in i or i in self.ignore_var:
                 continue
             val = eval('"{i} = [self.{i}]"'.format(i=i))
-            val:str
+            val: str
             val = val.replace('[','{')
             val = val.replace(']','}')
             res += eval(f"f\'{val}\'")+"\n"
@@ -55,14 +58,18 @@ class Data:
 
 
 class xyData(Data):
+    ignore_var = ['df','sqErr']
+
     def __init__(self, vals: list, x:list):
         super().__init__(vals)
         self.x = x
         self.R2 = (len(self.x)*sum([self.x[i]*self.y[i] for i in range(len(self.x))]) - sum(self.x)*sum(self.y))/ \
                   (((len(self.x)*sum([i**2 for i in self.x]))-sum(self.x)**2)*(len(self.x)*sum([i**2 for i in self.y])-sum(self.y)**2))**.5
         self.R2 = self.R2**2
+        self.df = None
+        self.sqErr = None
 
-    def f_LOBF(self):
+    def f_lobf(self):
         xy = {"x": self.x,
               "y": self.y,
               "logx": [math.log10(i) for i in self.x],
@@ -87,17 +94,22 @@ class xyData(Data):
         if r['lin'] == max(r.values()):
             m,b = reg(xy['x'],xy['y'])
             eq = f'y = {m}*x + {b}'
-            fig.add_scatter(x=xy['x'],y=[m*i+b for i in xy['x']],mode='lines+text+markers',name=eq)
+            fig.add_scatter(x=xy['x'],y=(yp:=[m*i+b for i in xy['x']]),mode='lines+text+markers',name=eq)
         elif r['pow'] == max(r.values()):
             m,b = reg(xy['logx'],xy['logy'])
             b=10**b
             eq = f'y = {b}*x^{m}'
-            fig.add_scatter(x=xy['x'],y=[b*i**m for i in xy['x']],mode='lines+text+markers',name=eq)
+            fig.add_scatter(x=xy['x'],y=(yp:=[b*i**m for i in xy['x']]),mode='lines+text+markers',name=eq)
         else:
             m,b = reg(xy['x'],xy['lny'])
             b = math.exp(b)
             eq = f'y = {b}*e^({m}*x)'
-            fig.add_scatter(x=xy['x'],y=[b*math.exp(m*i) for i in xy['x']],mode='lines+text+markers',name=eq)
-
+            fig.add_scatter(x=xy['x'],y=(yp:=[b*math.exp(m*i) for i in xy['x']]),mode='lines+text+markers',name=eq)
         print(eq)
+        self.df = pd.DataFrame(data={"x": xy['x'],
+                                     "y": xy['y'],
+                                     "yp": yp,
+                                     "y - yp": [xy['y'][i]-yp[i] for i in range(len(yp))],
+                                     "(y - yp)^2": [(xy['y'][i]-yp[i])**2 for i in range(len(yp))]})
+        self.sqErr = sum(self.df['(y - yp)^2'])
         fig.show()
