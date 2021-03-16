@@ -5,7 +5,7 @@ class Force:
 
     conv = {'N':1.,'LBF':4.448,'KGF':9.807}
 
-    def __init__(self, magnitude, direction, units="N", rad=True):
+    def __init__(self, magnitude, direction, units="N", rad=False):
         self.mag = magnitude
         self.ang = direction
         self.units = units.upper()
@@ -30,8 +30,8 @@ class Force:
         new_y = self.y*Force.conv[self.units] + other.y*Force.conv[other.units]
         return Force.parseXY(new_x/Force.conv[self.units], new_y/Force.conv[self.units],unit=self.units)
 
-    def print(self):
-        print(f'Magnitude:\t{self.mag} {self.units}\n'
+    def __repr__(self):
+        return (f'Magnitude:\t{self.mag} {self.units}\n'
               f'Angle:    \t{self.ang} radians\n'
               f'x:        \t{self.x} {self.units}\n'
               f'y:        \t{self.y} {self.units}')

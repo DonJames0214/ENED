@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 import math
+from sympy import Symbol,sympify,diff
 
 
 class Data:
@@ -62,7 +63,7 @@ class xyData(Data):
                   (((len(self.x)*sum([i**2 for i in self.x]))-sum(self.x)**2)*(len(self.x)*sum([i**2 for i in self.y])-sum(self.y)**2))**.5
         self.R2 = self.R2**2
 
-    def f_LOBF(self):
+    def f_LOBF(self, show=True):
         xy = {"x": self.x,
               "y": self.y,
               "logx": [math.log10(i) for i in self.x],
@@ -98,6 +99,24 @@ class xyData(Data):
             b = math.exp(b)
             eq = f'y = {b}*e^({m}*x)'
             fig.add_scatter(x=xy['x'],y=[b*math.exp(m*i) for i in xy['x']],mode='lines+text+markers',name=eq)
+        if show:
+            print(eq)
+            fig.show()
+        return eq
 
-        print(eq)
-        fig.show()
+    def f_rate_of_change(self,x,n=15):
+        try:
+            assert min(self.x)<=x<=max(self.x)
+        except AssertionError:
+            if x > max(self.x):
+                x = max(self.x)
+            else:
+                x = min(self.x)
+            print(f'x was out of range!\nx has been set to {x}')
+        y = Symbol('y')
+        eq = self.f_LOBF(show=False)
+        eq = eq[eq.find('=')+1:]
+        eq = diff(sympify(eq.replace('x','y')))
+        return eq.evalf(n=n,subs={y: x})
+
+
