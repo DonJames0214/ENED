@@ -49,7 +49,7 @@ class _SpringSystem:
         for i in kwargs:
             self.__dict__[i] = kwargs[i]
 
-    def __str__(self):
+    def __repr__(self):
         msg = \
             f'''<----------------{(ind:='-'*max(len(str(i)) for i in [self.K_eq, self.F_total, self.X_Total]))}------------->
   K equation:  {self.K_eq} N/m  
@@ -78,7 +78,7 @@ class Spring:
         self.f = 0
 
     @staticmethod
-    def comp_elong(F_total,par=False,**kwargs):
+    def comp_elong(F_total, par=False, **kwargs):
         if par:
             keq = sum([kwargs[i].k for i in kwargs])
             for i in kwargs:

@@ -1,4 +1,12 @@
-from ENED_ToolKit.Statics.Object import StaticObject
-from ENED_ToolKit.forces import Force
-obj = StaticObject(A=[Force(10,90,rad=False),2],B=[Force(10,45,rad=False),10])
-obj.solve(deg=30,mag=15,)
+from ENED_ToolKit.Shape import *
+from ENED_ToolKit.Figures.graph import LineGraph
+import numpy as np
+
+shape1 = Triangle(a=Side(3),b=Side(4),c=Angle(45))
+x =np.linspace(.1,179.9,num=100)
+y = []
+for i in x:
+    shape = Triangle(a=Side(3),b=Side(4),mc=Angle(i))
+    y.append(shape.C)
+graph = LineGraph(Triangle=[x,y])
+graph.show()
