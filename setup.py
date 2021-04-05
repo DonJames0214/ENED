@@ -2,4 +2,4 @@ from setuptools import setup
 
 setup(name="ENED_ToolKit",
       author="DJ McFarland",
-      version="0.3.1")
+      version="0.4")
