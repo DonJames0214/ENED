@@ -16,7 +16,7 @@ class StaticObject:
                 raise Exception('Inputs for a static object must be a list of size 2\nWith the first value being'
                                 ' a force object while the second value \nIs the distance from the axis of rotation')
             kwargs[i][0]: type(Force(0,0))
-            self.x_moments[i] = kwargs[i][0].x*kwargs[i][1]
+            self.x_moments[i] = kwargs[i][0].X_Total * kwargs[i][1]
             self.y_moments[i] = kwargs[i][0].y*kwargs[i][1]
         self.delta_force = Force(0,0)
         for i in kwargs.values():
