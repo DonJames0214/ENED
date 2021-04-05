@@ -1,4 +1,4 @@
-from ..setup import version_num
+
 ENED_Description = \
 '''
 <------------------------------------------->
@@ -10,4 +10,6 @@ ENED_Description = \
    the README.docx on the GitHub Repository
    located at:
    https://github.com/DonJames0214/ENED 
+<------------------------------------------->
 '''
+print(ENED_Description.format(v="0.3.1"))
