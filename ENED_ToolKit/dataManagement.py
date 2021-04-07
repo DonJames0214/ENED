@@ -72,9 +72,9 @@ class xyData(Data):
     def f_lobf(self):
         xy = {"x": self.x,
               "y": self.y,
-              "logx": [math.log10(i) for i in self.x],
-              "logy": [math.log10(i) for i in self.y],
-              "lny": [math.log(i) for i in self.y]}
+              "logx": [math.log10(i) for i in filter(lambda x:x!=0, self.x)],
+              "logy": [math.log10(i) for i in filter(lambda x:x!=0,self.y)],
+              "lny": [math.log(i) for i in filter(lambda x:x!=0,self.y)]}
 
         def R_sq(x,y):
             return ((len(x)*sum(x[i]*y[i] for i in range(len(x)))-sum(x)*sum(y))/((len(x)*sum([i**2 for i in x])-sum(x)**2)*(len(x)*sum([i**2 for i in y])-sum(y)**2))**.5)**.5
@@ -85,27 +85,76 @@ class xyData(Data):
             m = sum([(x[i]-avg['x'])*(y[i]-avg['y']) for i in range(len(x))])/sum([(i-avg['x'])**2 for i in x])
             b = avg['y'] - m * avg['x']
             return m,b
+        yind = None
+        if 0 in xy['x']:
+            if 0 in xy['y']:
+                if xy['y'].index(0) == xy['x'].index(0):
+                    pass
+                else:
+                    del xy['logx'][xy['y'].index(0)]
+                    del xy['logy'][xy['x'].index(0)]
+            else:
+                del xy['logy'][xy['x'].index(0)]
+
+        if 0 in xy['y']:
+            yind = xy['y'].index(0)
+            if len(xy['y'])==len(xy['logx']):
+                del xy['logx'][xy['y'].index(0)]
+
+
+
 
         r = {'lin':R_sq(xy['x'],xy['y']),
-             'pow':R_sq(xy['logx'],xy['logy']),
-             'exp':R_sq(xy['x'],xy['lny'])}
+             'pow':R_sq(xy['logx'],xy['logy'])}
+        if yind is not None:
+            r['exp'] = R_sq([i for i in filter(lambda x:x!=xy['x'][yind],xy['x'])],xy['lny'])
+        else:
+            r['exp'] = R_sq(xy['x'],xy['lny'])
         fig = go.Figure()
         fig.add_scatter(x=xy['x'],y=xy['y'],mode='markers+text',name='Scatter')
-        if r['lin'] == max(r.values()):
-            m,b = reg(xy['x'],xy['y'])
-            eq = f'y = {m}*x + {b}'
-            fig.add_scatter(x=xy['x'],y=(yp:=[m*i+b for i in xy['x']]),mode='lines+text+markers',name=eq)
-        elif r['pow'] == max(r.values()):
-            m,b = reg(xy['logx'],xy['logy'])
-            b=10**b
-            eq = f'y = {b}*x^{m}'
-            fig.add_scatter(x=xy['x'],y=(yp:=[b*i**m for i in xy['x']]),mode='lines+text+markers',name=eq)
-        else:
-            m,b = reg(xy['x'],xy['lny'])
-            b = math.exp(b)
-            eq = f'y = {b}*e^({m}*x)'
-            fig.add_scatter(x=xy['x'],y=(yp:=[b*math.exp(m*i) for i in xy['x']]),mode='lines+text+markers',name=eq)
+        fun = lambda x:None
+        try:
+            if r['lin'] == max(r.values()):
+                m,b = reg(xy['x'],xy['y'])
+                eq = f'y = {m}*x + {b}'
+                fig.add_scatter(x=xy['x'],y=(yp:=[m*i+b for i in xy['x']]),mode='lines+text+markers',name=eq)
+                fun = lambda x:m*x+b
+            elif r['pow'] == max(r.values()):
+                m,b = reg(xy['logx'],xy['logy'])
+                b=10**b
+                eq = f'y = {b}*x^{m}'
+                fig.add_scatter(x=xy['x'],y=(yp:=[b*i**m for i in xy['x']]),mode='lines+text+markers',name=eq)
+                fun = lambda x:b*x**m
+            else:
+                m,b = reg(xy['x'],xy['lny'])
+                b = math.exp(b)
+                eq = f'y = {b}*e^({m}*x)'
+                fig.add_scatter(x=xy['x'],y=(yp:=[b*math.exp(m*i) for i in xy['x']]),mode='lines+text+markers',name=eq)
+                fun = lambda x:b*math.exp(m*x)
+        except TypeError:
+            try:
+                if r['pow'] == max(r.values()):
+                    m, b = reg(xy['logx'], xy['logy'])
+                    b = 10 ** b
+                    eq = f'y = {b}*x^{m}'
+                    fig.add_scatter(x=xy['x'], y=(yp := [b * i ** m for i in xy['x']]), mode='lines+text+markers', name=eq)
+                    fun = lambda x: b * x ** m
+                else:
+                    m, b = reg(xy['x'], xy['lny'])
+                    b = math.exp(b)
+                    eq = f'y = {b}*e^({m}*x)'
+                    fig.add_scatter(x=xy['x'], y=(yp := [b * math.exp(m * i) for i in xy['x']]), mode='lines+text+markers',
+                                    name=eq)
+                    fun = lambda x: b * math.exp(m * x)
+            except TypeError:
+                m, b = reg(xy['x'], xy['lny'])
+                b = math.exp(b)
+                eq = f'y = {b}*e^({m}*x)'
+                fig.add_scatter(x=xy['x'], y=(yp := [b * math.exp(m * i) for i in xy['x']]), mode='lines+text+markers',
+                                name=eq)
+                fun = lambda x: b * math.exp(m * x)
         print(eq)
+        print(len(yp),len(xy['x']),len(xy['y']),sep='----')
         self.df = pd.DataFrame(data={"x": xy['x'],
                                      "y": xy['y'],
                                      "yp": yp,
@@ -113,3 +162,4 @@ class xyData(Data):
                                      "(y - yp)^2": [(xy['y'][i]-yp[i])**2 for i in range(len(yp))]})
         self.sqErr = sum(self.df['(y - yp)^2'])
         fig.show()
+        return fun
