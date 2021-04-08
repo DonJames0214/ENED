@@ -22,7 +22,6 @@ class Force:
         ang = atan(y / x)
         if x < 0:
             ang += pi
-        print(ang)
         return Force(mag, ang,units=unit,rad=True)
 
     def __add__(self, other):
