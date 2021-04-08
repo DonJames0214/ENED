@@ -14,6 +14,15 @@ class _Range:
         else:
             return self.__i
 
+    def __repr__(self):
+        res = ''
+        for i in self:
+            if res == '':
+                res = str(i)
+            else:
+                res += ', {i}'.format(i=i)
+        return res
+
 
 class Even_Range(_Range):
 
