@@ -12,4 +12,4 @@ ENED_Description = \
    https://github.com/DonJames0214/ENED 
 <------------------------------------------->
 '''
-print(ENED_Description.format(v="0.4.1"))
+print(ENED_Description.format(v="0.4.2"))
