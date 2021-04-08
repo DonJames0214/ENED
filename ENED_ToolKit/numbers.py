@@ -8,7 +8,6 @@ class _Range:
         return self
 
     def __next__(self):
-        print(self.__i)
         self.__i += 2
         if self.__i > self.n:
             raise StopIteration
