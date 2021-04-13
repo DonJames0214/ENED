@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ENED_ToolKit',
-    version='0.4.1',
+    version='0.4.2',
     packages=['ENED_ToolKit'],
     url='https://github.com/DonJames0214/ENED',
     license='',
