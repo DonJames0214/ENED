@@ -50,8 +50,9 @@ class _SpringSystem:
             self.__dict__[i] = kwargs[i]
 
     def __repr__(self):
+        ind = '-' * max(len(str(i)) for i in [self.K_eq, self.F_total, self.X_Total])
         msg = \
-            f'''<----------------{(ind:='-'*max(len(str(i)) for i in [self.K_eq, self.F_total, self.X_Total]))}------------->
+            f'''<----------------{ind}------------->
   K equation:  {self.K_eq} N/m  
   F total   :  {self.F_total} N
   x total   :  {self.X_Total} m
